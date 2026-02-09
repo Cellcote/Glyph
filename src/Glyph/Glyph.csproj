@@ -10,7 +10,11 @@
     <ToolCommandName>glyph</ToolCommandName>
     <PackageId>Glyph</PackageId>
     <Version>0.1.0</Version>
+    <Authors>Rik Schreurs</Authors>
     <Description>A Git TUI for trunk-based development</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/rikschreurs/Glyph</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/rikschreurs/Glyph</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
