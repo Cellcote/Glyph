@@ -8,17 +8,20 @@ Most Git TUIs are focused on repo state — staging files, viewing diffs, browsi
 
 ## Install
 
+### As a .NET tool (recommended)
+
+```bash
+dotnet tool install --global Glyph
+```
+
+### From source
+
 Requires [.NET 10](https://dotnet.microsoft.com/download) SDK.
 
 ```bash
 git clone git@github.com:Cellcote/Glyph.git
 cd Glyph
 dotnet build
-```
-
-Run from the build output:
-
-```bash
 dotnet run --project src/Glyph -- --help
 ```
 
