@@ -1,0 +1,18 @@
+using System.CommandLine;
+using Glyph.Commands;
+
+var rootCommand = new RootCommand("Glyph - A Git TUI for trunk-based development workflows");
+rootCommand.Subcommands.Add(TreeCommand.Create());
+rootCommand.Subcommands.Add(ParentCommand.Create());
+rootCommand.Subcommands.Add(RebaseCommand.Create());
+rootCommand.Subcommands.Add(PrCommand.Create());
+rootCommand.Subcommands.Add(SyncCommand.Create());
+rootCommand.Subcommands.Add(StackCommand.Create());
+
+// Default to tree view when no subcommand is given
+rootCommand.SetAction(parseResult =>
+{
+    TreeCommand.Create().Parse(Array.Empty<string>()).Invoke();
+});
+
+return rootCommand.Parse(args).Invoke();
