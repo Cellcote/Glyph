@@ -35,21 +35,21 @@ jobs:
       - name: Test
         run: dotnet test -c Release --no-build
 
-      - name: Determine version suffix
+      - name: Determine version
         id: version
         if: github.event_name == 'push'
         run: |
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             VERSION="${{ github.ref_name }}"
             VERSION="${VERSION#v}"
-            echo "pack_args=/p:Version=${VERSION}" >> "$GITHUB_OUTPUT"
           else
-            echo "pack_args=--version-suffix preview.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+            VERSION="0.1.$(date -u +%Y%m%d).${{ github.run_number }}"
           fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Pack
         if: github.event_name == 'push'
-        run: dotnet pack --no-build ${{ steps.version.outputs.pack_args }} -o ./artifacts
+        run: dotnet pack --no-build /p:Version=${{ steps.version.outputs.version }} -o ./artifacts
 
       - name: Publish to NuGet
         if: github.event_name == 'push'
