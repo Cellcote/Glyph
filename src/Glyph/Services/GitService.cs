@@ -98,6 +98,39 @@ public class GitService : IDisposable
         return files.OrderBy(f => f.FilePath).ToList();
     }
 
+    public string? GetMergeBase(string branchName, string parentName)
+    {
+        var branch = _repo.Branches[branchName];
+        var parent = _repo.Branches[parentName];
+
+        if (branch?.Tip == null || parent?.Tip == null)
+            return null;
+
+        var mergeBase = _repo.ObjectDatabase.FindMergeBase(branch.Tip, parent.Tip);
+        return mergeBase?.Sha;
+    }
+
+    public IReadOnlyList<CommitEntry> GetBranchCommits(string branchName, string parentName)
+    {
+        var mergeBase = GetMergeBase(branchName, parentName);
+        if (mergeBase == null)
+            return [];
+
+        var branch = _repo.Branches[branchName];
+        var mergeBaseCommit = _repo.Lookup<Commit>(mergeBase);
+
+        var filter = new CommitFilter
+        {
+            IncludeReachableFrom = branch.Tip,
+            ExcludeReachableFrom = mergeBaseCommit,
+            SortBy = CommitSortStrategies.Topological | CommitSortStrategies.Reverse
+        };
+
+        return _repo.Commits.QueryBy(filter)
+            .Select(c => new CommitEntry(c.Sha[..7], c.Sha, c.MessageShort))
+            .ToList();
+    }
+
     public (int Ahead, int Behind) GetDivergence(string branchName, string parentName)
     {
         var branch = _repo.Branches[branchName];
