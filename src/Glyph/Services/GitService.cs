@@ -16,6 +16,11 @@ public class GitService : IDisposable
         _config = config ?? new GlyphConfig();
     }
 
+    public static bool IsGitRepository(string? path = null)
+    {
+        return Repository.Discover(path ?? Directory.GetCurrentDirectory()) != null;
+    }
+
     public string CurrentBranchName => _repo.Head.FriendlyName;
 
     public string GetParentBranch(string branchName)

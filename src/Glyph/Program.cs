@@ -1,5 +1,13 @@
 using System.CommandLine;
 using Glyph.Commands;
+using Glyph.Services;
+using Spectre.Console;
+
+if (!GitService.IsGitRepository())
+{
+    AnsiConsole.MarkupLine("[red]Error:[/] Not a git repository (or any parent up to mount point).");
+    return 1;
+}
 
 var rootCommand = new RootCommand("Glyph - A Git TUI for trunk-based development workflows");
 rootCommand.Subcommands.Add(TreeCommand.Create());

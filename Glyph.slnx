@@ -2,4 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/Glyph/Glyph.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Glyph.Tests/Glyph.Tests.csproj" />
+  </Folder>
 </Solution>
