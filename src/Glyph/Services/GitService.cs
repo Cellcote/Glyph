@@ -68,6 +68,36 @@ public class GitService : IDisposable
         return branches;
     }
 
+    public IReadOnlyList<FileEntry> GetUnstagedFiles()
+    {
+        var status = _repo.RetrieveStatus(new StatusOptions { IncludeUntracked = true });
+        var files = new List<FileEntry>();
+
+        foreach (var entry in status)
+        {
+            var changeKind = entry.State switch
+            {
+                FileStatus.ModifiedInWorkdir => FileChangeKind.Modified,
+                FileStatus.NewInWorkdir => FileChangeKind.Added,
+                FileStatus.DeletedFromWorkdir => FileChangeKind.Deleted,
+                FileStatus.RenamedInWorkdir => FileChangeKind.Renamed,
+                FileStatus.TypeChangeInWorkdir => FileChangeKind.TypeChanged,
+                // Include files that are both staged and have workdir changes
+                var s when s.HasFlag(FileStatus.ModifiedInWorkdir) => FileChangeKind.Modified,
+                var s when s.HasFlag(FileStatus.NewInWorkdir) => FileChangeKind.Added,
+                var s when s.HasFlag(FileStatus.DeletedFromWorkdir) => FileChangeKind.Deleted,
+                var s when s.HasFlag(FileStatus.RenamedInWorkdir) => FileChangeKind.Renamed,
+                var s when s.HasFlag(FileStatus.TypeChangeInWorkdir) => FileChangeKind.TypeChanged,
+                _ => (FileChangeKind?)null
+            };
+
+            if (changeKind.HasValue)
+                files.Add(new FileEntry(entry.FilePath, changeKind.Value));
+        }
+
+        return files.OrderBy(f => f.FilePath).ToList();
+    }
+
     public (int Ahead, int Behind) GetDivergence(string branchName, string parentName)
     {
         var branch = _repo.Branches[branchName];

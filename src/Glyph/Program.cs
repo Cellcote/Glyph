@@ -16,6 +16,7 @@ rootCommand.Subcommands.Add(RebaseCommand.Create());
 rootCommand.Subcommands.Add(PrCommand.Create());
 rootCommand.Subcommands.Add(SyncCommand.Create());
 rootCommand.Subcommands.Add(StackCommand.Create());
+rootCommand.Subcommands.Add(AddCommand.Create());
 
 // Default to tree view when no subcommand is given
 rootCommand.SetAction(parseResult =>
