@@ -19,6 +19,7 @@ rootCommand.Subcommands.Add(StackCommand.Create());
 rootCommand.Subcommands.Add(AddCommand.Create());
 rootCommand.Subcommands.Add(CommitCommand.Create());
 rootCommand.Subcommands.Add(EditCommand.Create());
+rootCommand.Subcommands.Add(ShipCommand.Create());
 
 // Default to tree view when no subcommand is given
 rootCommand.SetAction(parseResult =>
