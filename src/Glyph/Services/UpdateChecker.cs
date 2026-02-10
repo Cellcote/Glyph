@@ -4,6 +4,9 @@ using System.Text.Json.Serialization;
 
 namespace Glyph.Services;
 
+[JsonSerializable(typeof(UpdateChecker.NuGetVersionIndex))]
+internal partial class UpdateCheckerJsonContext : JsonSerializerContext;
+
 public static class UpdateChecker
 {
     private const string NuGetIndexUrl = "https://api.nuget.org/v3-flatcontainer/glyph/index.json";
@@ -13,7 +16,7 @@ public static class UpdateChecker
 
     public static string GetCurrentVersion()
     {
-        var version = Assembly.GetExecutingAssembly()
+        var version = typeof(UpdateChecker).Assembly
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
 
         // Strip any +metadata suffix (e.g. "0.1.0+abc123")
@@ -32,7 +35,7 @@ public static class UpdateChecker
         using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(5) };
         http.DefaultRequestHeaders.UserAgent.ParseAdd("Glyph-UpdateChecker/1.0");
 
-        var response = await http.GetFromJsonAsync<NuGetVersionIndex>(NuGetIndexUrl);
+        var response = await http.GetFromJsonAsync(NuGetIndexUrl, UpdateCheckerJsonContext.Default.NuGetVersionIndex);
         if (response?.Versions is not { Count: > 0 })
             return null;
 
@@ -117,7 +120,7 @@ public static class UpdateChecker
         };
     }
 
-    private sealed class NuGetVersionIndex
+    internal sealed class NuGetVersionIndex
     {
         [JsonPropertyName("versions")]
         public List<string> Versions { get; set; } = [];
