@@ -8,14 +8,17 @@ public static class ShipCommand
 {
     public static Command Create()
     {
-        var messageArg = new Argument<string>("message") { Description = "Commit message" };
+        var messageArg = new Argument<string?>("message") { Description = "Commit message", DefaultValueFactory = _ => null };
+        var aiOption = new Option<bool>("--ai") { Description = "Generate commit message using AI" };
 
         var command = new Command("ship") { Description = "Stage all changes, commit, and push to origin" };
         command.Arguments.Add(messageArg);
+        command.Options.Add(aiOption);
 
         command.SetAction(async (ParseResult parseResult, CancellationToken ct) =>
         {
-            var message = parseResult.GetValue(messageArg)!;
+            var message = parseResult.GetValue(messageArg);
+            var useAi = parseResult.GetValue(aiOption);
             using var git = new GitService();
             var current = git.CurrentBranchName;
 
@@ -27,6 +30,27 @@ public static class ShipCommand
                 if (!string.IsNullOrEmpty(addErr))
                     AnsiConsole.WriteLine(addErr);
                 return;
+            }
+
+            // Resolve commit message if not provided
+            if (string.IsNullOrEmpty(message))
+            {
+                if (useAi)
+                {
+                    message = await CommitCommand.GenerateCommitMessageWithAi();
+                    if (message == null)
+                        return;
+                }
+                else
+                {
+                    message = AnsiConsole.Prompt(
+                        new TextPrompt<string>("Enter commit message:"));
+                    if (string.IsNullOrWhiteSpace(message))
+                    {
+                        AnsiConsole.MarkupLine("[red]Commit message cannot be empty.[/]");
+                        return;
+                    }
+                }
             }
 
             // Commit
